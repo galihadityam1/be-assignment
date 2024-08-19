@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: concrete_AI
+    ports:
+      - '5432:5432'
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/concrete_AI?schema=public
+      JWT_SECRET: secret
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres

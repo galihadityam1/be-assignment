@@ -1,0 +1,44 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  engineType      = "library"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  accounts  Account[]
+}
+
+model Account {
+  id             Int           @id @default(autoincrement())
+  token          String?
+  accountBalance Float          @default(0.0)
+  accountType    String         @default("savings")
+  userId         Int
+  user           User           @relation(fields: [userId], references: [id])
+  sentTxns       Transaction[]  @relation("sentTxns")
+  receivedTxns   Transaction[]  @relation("receivedTxns")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Transaction {
+  id                Int      @id @default(autoincrement())
+  transactionType   String   @default("Send")
+  currency          String
+  description       String?
+  transactionAmount Float
+  transactionTime   DateTime @default(now())
+  senderId          Int
+  receiverId        Int
+  status            String   @default("Pending")
+  senderAccount     Account  @relation("sentTxns", fields: [senderId], references: [id])
+  receiverAccount   Account  @relation("receivedTxns", fields: [receiverId], references: [id])
+}
